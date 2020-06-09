@@ -2,10 +2,10 @@
 grep -o "library(.*)" Inhalte/*.Rmd | \
     sort | uniq | \
     awk 'BEGIN{FS=":|\\(|\\)"; 
-         print "\"mosaic\", \"1.2.0\""
-         print "\"rmarkdown\", \"1.9\""
-         print "\"tinytex\", \"0.4\""
-         print "\"knitr\", \"1.20\""
+         print "\"mosaic\", \"1.7.0\""
+         print "\"rmarkdown\", \"2.1\""
+         print "\"tinytex\", \"0.23\""
+         print "\"knitr\", \"1.28\""
          print "\"futile.logger\", \"0\""
     } {
         x = $2

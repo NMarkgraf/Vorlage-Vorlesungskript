@@ -1,5 +1,5 @@
 # ===========================================================================
-# prelude.R (Release 2.4.0)
+# prelude.R (Release 3.0.0)
 # =========------------------------------------------------------------------
 # (W) by Norman Markgraf, Karsten Lübke & Sebastian Sauer in 2017-19
 #
@@ -60,8 +60,9 @@
 #                      Wegen der include_exclude.py Filter nun direkt in LaTeX
 #                      als Zähler dort. (beamerthemeNPBT.sty ab 4.2.1 nötig!!!)
 #                      (Release 2.4.0)
+# 07. Jul. 2020  (nm)  Ausmisten! (Release 3.0.0)
 #
-#   (C)opyleft Norman Markgraf in 2017-19
+#   (C)opyleft Norman Markgraf in 2017-20
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -89,10 +90,9 @@
 # ---------------------------------------------------------------------------
 # Logging für Anfänger
 if (!requireNamespace('futile.logger', quietly = TRUE)) {
-    stop("Please install the packages `futile.logger` (install.packages(\"futile.logger\") first!")
+  stop("Please install the packages `futile.logger` (install.packages(\"futile.logger\") first!")
 }
 library(futile.logger)
-
 # ---------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
@@ -102,12 +102,10 @@ library(knitr)
 
 knitr::opts_chunk$set(
   echo = TRUE,
-  background = "#ECF2F8", # war mal: '#E0E0E0',
+  background = "#ECF2F8",
   concordance = TRUE,
-  #    out.width="80%",
   tidy = FALSE,
   fig.align = "center",
-  #    fig.asp = .618,
   message = FALSE,
   warning = FALSE,
   width.cutoff = 70
@@ -137,7 +135,7 @@ options(width = 73) # Ausgabe auf 73 Zeichen pro Zeile begrenzen.
 # ---------------------------------------------------------------------------
 DEBUGMASTERFLAG <<- FALSE
 prelude.cleanMemory <<- TRUE  # Nach Benutzung ggf. unnütz gewordene 
-                              # prelude-Funktionen aus dem Speicher löschnen?
+# prelude-Funktionen aus dem Speicher löschnen?
 FOMLayout <<- TRUE
 EUFOMLayout <<- !FOMLayout
 
@@ -152,76 +150,58 @@ if (!exists("runCount")) {
 # sind. Sie sollte zu Beginn einer Rmd-Master-Datei ausgeführt werden.
 # ---------------------------------------------------------------------------
 initPrelude <- function(
-                        prefix = prefixZeit, # Prefix für das aktuelle Dokument
-                        doCheckPackages = TRUE, # Sollen die Pakete geprüft werden?
-                        initSeed = 1896, # Random Seed setzen auf ...
-                        basePath = ".") { 
-
-  owrOwnBasePath <<- basePath 
-  prefixZeit <<- prefix
-
-  # privateVorstellung <<- TRUE
-  # showVorlesungsplan <<- FALSE
+  doCheckPackages = TRUE, # Sollen die Pakete geprüft werden?
+  basePath = "."
+) { 
   
-  if (!exists("Vorlesungstermine")) {
-      Vorlesungstermine <<- "default"
-  }
+  owrOwnBasePath <<- basePath 
   
   showuseR <<- TRUE
   
-  kap <<- -1
-  ex <<- 0
-
-  # Keine Ahnung wofür das ist ***KL***??
   abschluss <<- FALSE
   WDH <<- "Wiederholung: "
-
+  
   message("load prelude tools")
   if (file.exists("prelude/prelude_tools.R")) {
-      source("prelude/prelude_tools.R", verbose=T)
+    source("prelude/prelude_tools.R", verbose=T)
   } else {
-      if (file.exists("../prelude/prelude_tools.R")) {
-          source("../prelude/prelude_tools.R", verbose=T)
-      } else {
-          print(getwd())
-      }
+    if (file.exists("../prelude/prelude_tools.R")) {
+      source("../prelude/prelude_tools.R", verbose=T)
+    } else {
+      print(getwd())
+    }
   }
-
+  
   loadPrelude("prelude_packages.R")
-
-  # Prüfen ob private.yaml existiert und ggf. mit Dafaultwerten füllen!
-  if (!file.exists("private.yaml")) {
-      cat("---\nauthor: \"FOM Dozent\\*in\"\ndate: \"\"\ninstitute: \"FOM\"\n---\n", file="private.yaml")
-  }
-
+  
   # Notwendige Pakete überprüfen und ggf. installieren.
   if (doCheckPackages) {
     checkPackages()
   }
-
+  
+  # Prüfen ob private.yaml existiert und ggf. mit Dafaultwerten füllen!
+  if (!file.exists("private.yaml")) {
+    cat("---\nauthor: \"FOM Dozent\\*in\"\ndate: \"\"\ninstitute: \"FOM\"\n---\n", file="private.yaml")
+  }
+  
   if (!exists("RENDEREDBYSCRIPT")) {
-      RENDEREDBYSCRIPT <<- FALSE
+    RENDEREDBYSCRIPT <<- FALSE
   }
   
   # Auf private Dateien (private.R,  und private.yaml) prüfen und ggf. laden.
   checkPrivateFiles(c("private-Semesterdaten.R"), path="private")
   
-  preludeFilelist <- c("prelude_timetable.R",
-                       "prelude_timetable.R",
-                       "prelude_images.R",
+  preludeFilelist <- c("prelude_images.R",
                        "prelude_python.R",
                        "prelude_panflute.R"
-                       )
+  )
   for(preludeFile in preludeFilelist){
-      loadPrelude(preludeFile)
+    loadPrelude(preludeFile)
   }
-
-  # Random Seed setzen
-  set.seed(initSeed)
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Liefert zu einer Dateinamen den Namen der "_default"-Datei
+# Liefert zu einem Dateinamen den Namen der "_default"-Datei
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 defaultFilename <- function(filename) {
   fn <- basename(filename)
@@ -235,8 +215,8 @@ defaultFilename <- function(filename) {
 # und danach die Datei selber.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 checkAndLoadPrivateFile <- function(filename, path=".") { # future: path="private") {
-    loadPrivate("private_default.R", stopOnFail=TRUE) 
-    loadPrivate("private.R", stopOnFail=FALSE)
+  loadPrivate("private_default.R", stopOnFail=TRUE) 
+  loadPrivate("private.R", stopOnFail=FALSE)
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -260,12 +240,10 @@ checkPrivateFiles <- function(addPrivateFiles = NULL, path=".") {  #  path="priv
 # einer Rmd-Master-Datei stehen.
 # ---------------------------------------------------------------------------
 finalizePrelude <- function() {
-  kap <<- -1
-  ex <<- 0
   abschluss <<- FALSE
   runCount <<- 0
   if (exists("RENDEREDBYSCRIPT")) {
-      rm("RENDEREDBYSCRIPT", inherits=TRUE)
+    rm("RENDEREDBYSCRIPT", inherits=TRUE)
   }
 }
 
@@ -274,13 +252,6 @@ if (runCount > 2) {
   runCount <<- 2
 }
 
-# ---------------------------------------------------------------------------
-# ownChapter steuert die Lübke'sche Kapitelverwaltung. (DEPRECATED!)
-# ---------------------------------------------------------------------------
-ownChapter <<- FALSE # Verwaltung der Kapitel durch LaTeX
-nextChapter <- function() {
-    return("")
-}
 
 # ---------------------------------------------------------------------------
 # Die nächste Übung ...
@@ -295,9 +266,7 @@ nextChapter <- function() {
 #' ## Exercise No. 'r nextExercise`: A new Exercise!
 #
 nextExercise <- function() {
-  # ex <<- ex + 1
-  # return(thisExercise())
-  return(paste0("\\nextExercise"))
+  return(paste0("\\nextExercise{}"))
 }
 
 # ---------------------------------------------------------------------------
@@ -313,8 +282,7 @@ nextExercise <- function() {
 #' ## Still exercise No. 'r thisExercise`!
 #
 thisExercise <- function() {
-  #return(paste0(ex, ""))
-  return(paste0("\\thisExercise"))
+  return(paste0("\\thisExercise{}"))
 }
 
 
@@ -322,10 +290,10 @@ thisExercise <- function() {
 # assertData (csv, url)
 # ---------------------------------------------------------------------------
 assertData <- function(
-                       csv,
-                       url,
-                       debug = FALSE,
-                       lang = "de") {
+  csv,
+  url,
+  debug = FALSE,
+  lang = "de") {
   td <- try(read.csv2(csv), silent = !debug)
   if (class(td) == "try-error") {
     if (debug) message(paste("Die Tabelle", csv, "wird von", url, "nachgeladen!"))
@@ -357,68 +325,41 @@ getPathToImages <- function(chapter = NULL) {
     cpt <- curPart.subdirname
   }
   return(file.path(".", "images", cpt))
-#  return(paste0(file.path(getPathToBase(), "images", cpt),"/"))
+  #  return(paste0(file.path(getPathToBase(), "images", cpt),"/"))
 }
 
 # ---------------------------------------------------------------------------
 # initPart
 # ---------------------------------------------------------------------------
 initPart <- function(
-                     partname = NULL,
-                     subdirname = "",
-                     debug = FALSE) {
-    curPart.name <<- ""
-    curPart.subdirname <<- subdirname
-    if (!is.null(partname)) {
-        curPart.name <<- partname
-    }
-    flog.debug(paste0("Starte mit Datei '", curPart.name, ".Rmd'"))
-    x <- paste0("'", paste(search(), collapse="', '"), "'")
-    flog.debug(paste("Aktueller Suchpfad:", x))
-    x <- paste0("'", paste(loadedNamespaces(), collapse="', '"), "'")
-    flog.debug(paste("Aktueller Namespaces", x))
+  partname = NULL,
+  subdirname = "",
+  debug = FALSE
+) {
+  curPart.name <<- ""
+  curPart.subdirname <<- subdirname
+  if (!is.null(partname)) {
+    curPart.name <<- partname
+  }
+  flog.debug(paste0("Starte mit Datei '", curPart.name, ".Rmd'"))
+  x <- paste0("'", paste(search(), collapse="', '"), "'")
+  flog.debug(paste("Aktueller Suchpfad:", x))
+  x <- paste0("'", paste(loadedNamespaces(), collapse="', '"), "'")
+  flog.debug(paste("Aktueller Namespaces", x))
 }
 
 # ---------------------------------------------------------------------------
 # finalizePart
 # ---------------------------------------------------------------------------
-finalizePart <- function(partname=NULL, debug=FALSE) {
-    x <- paste0("'", paste(search(), collapse="', '"), "'")
-    flog.debug(paste("Aktueller Suchpfad:", x))
-    flog.debug(paste0("Ende mit Datei '", curPart.name,".Rmd'!"))
-    x <- paste0("'", paste(loadedNamespaces(), collapse="', '"), "'")
-    flog.debug(paste("Aktueller Namespaces", x))
-    
-    curPart.name <<- NULL
-    curPart.subdirname <<- NULL
+finalizePart <- function(partname = NULL, debug = FALSE) {
+  x <- paste0("'", paste(search(), collapse = "', '"), "'")
+  flog.debug(paste("Aktueller Suchpfad:", x))
+  flog.debug(paste0("Ende mit Datei '", curPart.name,".Rmd'!"))
+  x <- paste0("'", paste(loadedNamespaces(), collapse = "', '"), "'")
+  flog.debug(paste("Aktueller Namespaces", x))
+  
+  curPart.name <<- NULL
+  curPart.subdirname <<- NULL
 }
-# ---------------------------------------------------------------------------
-# setupFOMColors
-# --------------
-# Passt einige Mosaic/ Lattice/ Trellis Graphiken an das FOM CD an.
-# ---------------------------------------------------------------------------
-setupFOMColors <- function() {
-  library(mosaic)
-
-  FOMColor.line <- "#00998A"
-  FOMColor.polygon.col <- "#BFE5E2"
-  FOMColor.polygon.border <- "#007368"
-
-  trellis.par.set(
-    list(
-      add.line = list(col = FOMColor.line),
-      plot.polygon = list(col = FOMColor.polygon.col, border = FOMColor.polygon.border),
-      box.rectangle = list(col = FOMColor.polygon.border),
-      box.umbrella = list(col = FOMColor.polygon.border),
-      box.dot = list(col = FOMColor.polygon.border),
-      plot.line = list(col = FOMColor.line),
-      plot.symbol = list(col = FOMColor.polygon.border),
-      dot.symbol = list(col = FOMColor.line),
-      dot.line = list(col = FOMColor.polygon.border),
-      superpose.line = list(col = FOMColor.line)
-    )
-  )
-}
-
 
 # ===========================================================================
